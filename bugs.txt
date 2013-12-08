@@ -75,3 +75,5 @@ rollback on reduce phase should delete things created on map phase
 dsup does not handle cell arrays correctly
 
 if dswork is writing things that repeat, keep going (don't keyboard), but exit with error once things are done...better yet, dsup should not work in distributed mode.
+
+found something still running error (e.g. when we run out of disk space).  should be handled via drop-to-command-line.

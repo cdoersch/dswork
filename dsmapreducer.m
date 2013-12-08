@@ -54,7 +54,7 @@ else
   delete(commlinkin);
   %sshsocket=[dsoutdir 'ds/sys/distproc/sshsocket' num2str(dsdistprocid) '-%h'];
   disp('got interrupt');
-  if(isfield(ds.sys.distproc,'pendingwrite'))
+  if(dsfield(ds,'sys','distproc','pendingwrite'))
     dsmapreducerwritepending(commlinkout,true)
   else
     cmd=struct();
