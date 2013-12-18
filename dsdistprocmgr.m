@@ -848,11 +848,12 @@ end
 function handledeletion(todelete,forcedeletedirs)
   global ds;
   try
+  if(isempty(todelete)),return;end
   createddirs={};
   createdcells={};
-  keyboard
+  todelete=summarizedeletion(todelete);
   for(i=1:numel(todelete))
-    if(iscell(todelete(i).inds))
+    if(iscell(todelete(i).inds)&&numel(todelete(i).inds)==0)
       createdcells=[createdcells;todelete(i)];
     elseif(isstruct(todelete(i).inds))
       createddirs=[createddirs;todelete(i)];
@@ -864,12 +865,13 @@ function handledeletion(todelete,forcedeletedirs)
       eval(['ds.sys.savestate' todelete(i).vars(4:end) '{2}([' num2str(todelete(i).inds(:)') '])=1']);
       dsdelete([todelete(i).vars '{' num2str(todelete(i).inds(:)') '}']);
     else
-      linidx=sub2ind(eval(['size(ds.sys.savestate' todelete(i).vars(4:end) '{2})']),todelete(i).inds(:,1),todelete(i).inds(:,2));
-      eval(['ds.sys.savestate' todelete(i).vars(4:end) '{2}([' num2str(linidx(:)') '])=1']);
+      %linidx=sub2ind(eval(['size(ds.sys.savestate' todelete(i).vars(4:end) '{2})']),todelete(i).inds{1},todelete(i).inds(:,2));
       inds=todelete(i).inds;
-      for(i=unique(inds(:,2)))
-        dsdelete([todelete(i).vars '{' num2str(i) '}{' num2str(inds(inds(:,2)==i,1)') '}']);
-      end
+      eval(['ds.sys.savestate' todelete(i).vars(4:end) '{2}([' num2str(inds{1}') ',' num2str(inds{2}') '])=1']);
+      %for(i=unique(inds(:,2)))
+        dsdelete([todelete(i).vars '{' num2str(inds{1}') '}{' num2str(inds{2}') '}']);
+        %dsdelete([todelete(i).vars '{' num2str(inds(inds(:,2)==i,1)') '}{' num2str(i) '}']);
+      %end
     end
   end
   for(i=1:numel(createdcells))
@@ -885,6 +887,60 @@ function handledeletion(todelete,forcedeletedirs)
     end
   end
   catch ex,dsprinterr;end
+end
+
+function res=summarizedeletion(todelete)
+  global ds;
+  try
+  allnams={todelete.vars};
+  unams=unique(allnams)
+  res=struct('vars',{},'inds',{});
+  for(i=1:numel(unams))
+    mydelete=todelete(ismember(allnams,unams{i}));
+    if(numel(mydelete)==1)
+      res=[res;mydelete];
+      continue;
+    end
+    savest=eval(['ds.sys.savestate' unams{i}(4:end) '{2}'])~=0;
+    deletesavest=false(size(savest));
+    createdcell=false;
+    for(j=1:numel(mydelete))
+      inds=mydelete(j).inds;
+      if(isempty(inds))
+        createdcell=true;
+        break;
+      end
+      rowvec=false;
+      if(size(inds,2)==1)
+        rowvec=true;
+        inds=[ones(size(inds)), inds];
+      end
+      deletesavest(sub2ind(size(deletesavest),inds(:,1),inds(:,2)))=true;
+    end
+    if(createdcell)
+      res=[res;struct('vars',unams{i},'inds',{})];
+      res=[res;struct('vars',unams{i},'inds',{{}})];
+      continue;
+    end
+    %if(all(deletesavest|(~savest))&&createdcell)
+    %  continue;
+    %end
+    savest(all(~savest,1))=1;%any columns that are empty should be skipped during deletion
+    safetodelete=(deletesavest|(~savest))';
+    deletionforgroup=unique(safetodelete,'rows');
+    [~,deletegroups]=ismember(safetodelete,deletionforgroup,'rows');
+    append=struct('vars',{},'inds',{});
+    for(j=1:size(deletionforgroup,1))
+      inds=find(deletegroups==j);
+      if(~rowvec)
+        inds={find(deletionforgroup(j,:))', inds};
+      end
+      append=[append;struct('vars',{unams{i}},'inds',{inds})];
+    end
+    res=[res;append];
+  end
+  catch ex, dsprinterr;end
+  
 end
 
 function dscancel()
