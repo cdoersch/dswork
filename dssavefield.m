@@ -118,7 +118,7 @@ try
       else
         istxt=0;
       end
-      marks2=zeros(size(f));
+      marks2=false(size(f));
       if(~isempty(marks))
         marks2(1:size(marks,1),1:size(marks,2))=marks;
       end
@@ -146,31 +146,35 @@ try
         %  if(any((~marks2(i,brakidx{2}))|(~fisempty(dssf_k,:))))
         %    mymkdir(dirnm);
         %  end
-        ntosave=sum(sum(marks2(brakidx{2})~=1));
+        ntosave=sum(sum(~marks2(brakidx{2})));
         ntotal=numel(marks2);
         chmodeach=(ntosave/ntotal)<.05;
         %fisempty=cellfun(@(x) isempty(x),f(brakidx{2}));
         fisempty=[];%logical(zeros(1,brakidx{2}));
-        for(i=numel(brakidx{2}):-1:1)
-          fisempty(i)=isempty(f{brakidx{2}(i)});
-        end
+        %for(i=numel(brakidx{2}):-1:1)
+        %  fisempty(i)=isempty(f{brakidx{2}(i)});
+        %end
+        fisempty=cellfun(@isempty,f(brakidx{2}));
         dssf_l=0;
         dssf_k=1;
         i=1;
         dirnm=odirnm;%we used to support 2d cell arrays, but they were useless
         if(strcmp(task,'savedistr'))
-          indstmp=brakidx{2}(find((marks2(brakidx{2}(:))~=1)&(~fisempty(dssf_k,:))));
+          indstmp=brakidx{2}(find((~marks2(brakidx{2}(:)))&(~fisempty(dssf_k,:))));
           if(~isempty(indstmp))
             ds.sys.saved=[ds.sys.saved;{[pathprefix '.' fnam],indstmp(:)}];
             respath=[respath;{[pathprefix '.' fnam],indstmp(:)}];
           end
         end
-          for(j=brakidx{2}(:)')
-            dssf_l=dssf_l+1;
-            if((marks2(i,j)~=1)&&(~fisempty(dssf_k,dssf_l)))
+          dssf_inds=find(~fisempty(dssf_k,:));
+
+          for(dssf_l=dssf_inds)%j=brakidx{2}(:)')
+            j=brakidx{2}(dssf_l);
+            %dssf_l=dssf_l+1;
+            %if((marks2(i,j)~=1)&&(~fisempty(dssf_k,dssf_l)))
               if(isimg)
                 filenm=[dirnm '/' num2str(j) '.jpg'];
-                imwrite(f{i,j},filenm);
+                imwrite(f{i,j},filenm,'Quality',95);
               elseif(ispng)
                 filenm=[dirnm '/' num2str(j) '.png'];
                 dssavepng(f{i,j},filenm);
@@ -194,22 +198,22 @@ try
                 fprintf(fptr,f{i,j});
                 fclose(fptr);
               end
-              marks2(1,j)=1;
-            end
-            if(exist('filenm','var')&&dochmod&&chmodeach)
-              unix(['chmod 755 ' filenm]);
-            end
+              marks2(1,j)=true;
+              if(exist('filenm','var')&&dochmod&&chmodeach)
+                unix(['chmod 755 ' filenm]);
+              end
+            %end
           end
         %end
         if(dochmod&&(~chmodeach))
           unix(['chmod -R 755 ' dirnm]);
         end
       else
-        ntosave=sum(sum(marks2(brakidx{1},brakidx{2})~=1));
+        ntosave=sum(sum(~marks2(brakidx{1},brakidx{2})));
         ntotal=numel(marks2);
         chmodeach=(ntosave/ntotal)<.05;
         %fisempty=cellfun(@(x) isempty(x),f(brakidx{1},brakidx{2}));
-        fnosv=(marks2(brakidx{1},brakidx{2})>0);%(zeros(brakidx{1},brakidx{2})>0);
+        fnosv=(marks2(brakidx{1},brakidx{2}));%(zeros(brakidx{1},brakidx{2})>0);
         for(i=numel(brakidx{2}):-1:1)
           for(j=numel(brakidx{1}):-1:1)
             fnosv(j,i)=(fnosv(j,i)||isempty(f{brakidx{1}(j),brakidx{2}(i)}));
@@ -280,7 +284,7 @@ try
                   indstosave=[indstosave j];
                 %  marks2{i}=1;
                 %end
-              marks2(j,i)=1;
+              marks2(j,i)=true;
               %disp(j)
               %keyboard;
             end
@@ -389,7 +393,7 @@ try
           else
             imwrite(f,filenm{1});
           end
-            savestate=setfield(savestate,fnam,1);
+            savestate=setfield(savestate,fnam,true);
           %end
         elseif(dshassuffix(fnam,'html') || dshassuffix(fnam,'txt'))
           %filenm=[currpath '/' fnam '.html'];
@@ -401,7 +405,7 @@ try
             fprintf(fptr,f);
             %fprintf(fptr,'%s',f);
             fclose(fptr);
-            savestate=setfield(savestate,fnam,1);
+            savestate=setfield(savestate,fnam,true);
           %end
         elseif(dshassuffix(fnam,'fig'))
             %set(f,'Position',[5 5 960 600]);
@@ -413,7 +417,7 @@ try
           %  savestate=setfield(savestate,fnam,1);
           %elseif(~movesonly)
             dssavefig(f,filenm{1},filenm{2});
-            savestate=setfield(savestate,fnam,1);
+            savestate=setfield(savestate,fnam,true);
           %end
 
             %oldscreenunits = get(f,'Units');
@@ -451,7 +455,7 @@ try
             else
               save(filenm{1},'data');
             end
-            savestate=setfield(savestate,fnam,1);
+            savestate=setfield(savestate,fnam,true);
           %end
         end
       end

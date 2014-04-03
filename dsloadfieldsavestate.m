@@ -93,7 +93,7 @@ for(dslf_idx=1:numel(cfnam))
         %cellsavest=zeros(max(dslf_brakidx{1}),max(dslf_brakidx{2}));
         %tic
         if(isimg||ishtml||istxt)
-          cellsavest(dslf_brakidx{2})=1;
+          cellsavest(dslf_brakidx{2})=true;
         else
           cellsavest=[];
           for(dslf_i=dslf_brakidx{2}(:)')
@@ -133,7 +133,7 @@ for(dslf_idx=1:numel(cfnam))
             %toc
             %dslf_files={dslf_files.name};
             for(dslf_j=dslf_brakidx{1}(:)')
-              cellsavest(dslf_j,dslf_i)=1;
+              cellsavest(dslf_j,dslf_i)=true;
               %if(strcmp(task,'load'))
                 %if(isimg)
                 %  cellsavest(dslf_i,dslf_j)=ismember(dslf_j,dslf_cols);%(exist([fpath2 '/' num2str(dslf_j) '.jpg'],'file')>0);
@@ -188,7 +188,7 @@ for(dslf_idx=1:numel(cfnam))
       %if(strcmp(task,'load'))
       %  currds=setfield(currds,vnam,data);
       end
-      savestate=setfield(savestate,fnam,1);
+      savestate=setfield(savestate,fnam,true);
     end
 end
   %keyboard;

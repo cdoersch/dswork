@@ -36,7 +36,7 @@ ds_toks=regexp(ds_matchstr,'\.','split');
 ds_toks=ds_toks(2:end);
 if(dsfield(ds,ds_toks{:}))
   if((~isempty(ds_brakidx))&&dsfield(ds,[ds_pfx '.sys.savestate' ds_sfx])&&(~isempty(eval([ds_pfx '.sys.savestate' ds_sfx]))))
-    eval([ds_pfx '.sys.savestate' ds_sfx '{2}(ds_brakidx)=0;']);
+    eval([ds_pfx '.sys.savestate' ds_sfx '{2}(ds_brakidx)=false;']);
   else
     if(dsfield(ds,['sys.savestate',ds_sfx]))
       if(eval(['iscell(' ds_pfx '.sys.savestate' ds_sfx ')']))

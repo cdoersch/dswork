@@ -92,7 +92,7 @@ function dsdistprocmgr(startfresh)
     ds.sys.distproc.mapvars={};
   end
   cmd.clearlocaldir=0;%isempty(ds.sys.distproc.reducevars);
-  save([ds.sys.outdir 'ds/sys/distproc/savestate.mat'],'cmd');
+  save([ds.sys.outdir 'ds/sys/distproc/savestate.mat'],'cmd','-v7.3');
   runthisround=[];
   for(i=1:50)
     cleaners{i}=onCleanup(@handleinterrupt);
@@ -106,7 +106,9 @@ function dsdistprocmgr(startfresh)
     end
     wait=1;
     if(ds.sys.distproc.allatonce)
-      jobsthisround=ceil(numel(ds.sys.distproc.jobsinq)/(numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.hdead)));
+      [~,idx]=ismember(ds.sys.distproc.hostname(setdiff(ds.sys.distproc.possibleslaves,ds.sys.distproc.hdead)),unique(ds.sys.distproc.hostname));
+      totalprocs=sum(min(histc(idx,1:numel(unique(ds.sys.distproc.hostname))),ds.sys.distproc.maxperhost));
+      jobsthisround=ceil(numel(ds.sys.distproc.jobsinq)/totalprocs);
     else
       jobsthisround=ceil(numel(ds.sys.distproc.jobsinq)/(2*(numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.hdead))));
     end
@@ -373,14 +375,25 @@ function [ds, gotinterrupt] = readslave_atomic(ds,idx,isrunning,loadresults,hand
         %  ds.sys.distproc.availprocs=[ds.sys.distproc.availprocs idx];
         %end
         if(ismember(idx,ds.sys.distproc.availslaves))
-            try
-            error('mapreducer started that was already available');
-            catch ex; dsprinterr;end
+            %try
+            %error('mapreducer started that was already available');
+            %catch ex; dsprinterr;end
+            disp(['mapreducer ' num2str(idx) ' started that was already available']);
         end
+        delete([ds.sys.distproc.progresslink{idx} '_' num2str(ds.sys.distproc.nextfile(idx)) '.mat']);
+        ds.sys.distproc.hascleared(idx)=false;
         ds.sys.distproc.allslaves=unique([ds.sys.distproc.allslaves idx]);
         ds.sys.distproc.idleprocs=unique([ds.sys.distproc.idleprocs idx]);
         ds.sys.distproc.availslaves=unique([ds.sys.distproc.availslaves idx]);
         ds.sys.distproc.hostname{idx}=cmd.host;
+        myincompjobs=ismember(ds.sys.distproc.jobsproc(2,:),idx);
+        compjobs=myincompjobs(find(ds.sys.distproc.jobprogress(myincompjobs)));
+        myincompjobs=setdiff(myincompjobs,compjobs);
+        ds.sys.distproc.donotassociate=[ds.sys.distproc.donotassociate ds.sys.distproc.jobsproc(:,myincompjobs)];
+        ds.sys.distproc.jobsinq=[ds.sys.distproc.jobsproc(1,myincompjobs) ds.sys.distproc.jobsinq];
+        ds.sys.distproc.jobsproc(:,[myincompjobs(:)' compjobs(:)'])=[];
+        ds.sys.distproc.jobprogress(myincompjobs)=0;
+        ds.sys.distproc.nextfile(idx)=1;
         %if(~ismember(cmd.host,ds.sys.distproc.uniquehosts))
         %  ds.sys.distproc.uniquehosts{1,end+1}=cmd.host;
           %ds.sys.distproc.runningperhost{1,end+1}=[];
@@ -557,7 +570,7 @@ function ds=handlewritten(ds,saved,completed,loadresults)
         %end
         
         if(~dsfield(svnm)||eval(['numel(' svnm ')<2'])||eval(['~all(size(' svnm '{2})>=max(sv.inds,[],1))']))
-          eval([svnm '{2}(max(sv.inds(:,1)),max(sv.inds(:,2)))=0;'])
+          eval([svnm '{2}(max(sv.inds(:,1)),max(sv.inds(:,2)))=false;'])
         end
         indstr=sub2ind(eval(['size(' svnm '{2})']),sv.inds(:,1),sv.inds(:,2));
         indstr=['[' num2str(indstr(:)') ']'];
@@ -807,7 +820,7 @@ function dsruncommand(idx)
     ds.sys.distproc.reducehosts=ds.sys.distproc.hostname(ds.sys.distproc.forcerunset);
     workerhost=ds.sys.distproc.hostname{hostid};
     [~,hname]=unix('hostname');
-    if(~strcmp(workerhost,hname(1:end-1)))
+    if(~strcmp(workerhost,hname(1:end-1))&&dsfield(ds.sys.distproc,'localdir'))
       for(i=1:numel(ds.sys.distproc.mapredreducevars))
         unix(['scp "' workerhost ':' ds.sys.distproc.localdir ds.sys.distproc.mapredreducevars{i}(2:end) '[]~*~' num2str(hostid) '.mat" ' ds.sys.distproc.localdir]);
         (['scp "' workerhost ':' ds.sys.distproc.localdir ds.sys.distproc.mapredreducevars{i}(2:end) '[]~*~' num2str(hostid) '.mat" ' ds.sys.distproc.localdir])

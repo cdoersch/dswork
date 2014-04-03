@@ -28,6 +28,10 @@ function resetdistproc();
   ds.sys.distproc.reducevars={};
   ds.sys.distproc.hascleared=false(ds.sys.distproc.nmapreducers,1);
   ds.sys.distproc.createddirs=struct('var',{},'inds',{},'jid',{});
+
+  if(isfield(ds.sys.distproc,'reducestarted'))
+    rmfield(ds.sys.distproc,'reducestarted');
+  end
   if(isfield(ds.sys.distproc,'pendingwrite'))
     rmfield(ds.sys.distproc,'pendingwrite');
   end

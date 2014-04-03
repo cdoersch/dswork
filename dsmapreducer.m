@@ -69,7 +69,7 @@ ds.sys.distproc.sshconf=sshconf;
 nwaits=0;
 while(1)
   if(mod(nwaits,12)==0)
-    if(exist([dsoutdir 'ds/sys/distproc/exit','file']))
+    if(exist([dsoutdir 'ds/sys/distproc/exit'],'file'))
       disp('got exit signal')
       cmd.name='exited';
       save(commlinkout,'cmd');

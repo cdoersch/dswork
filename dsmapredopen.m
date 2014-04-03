@@ -111,6 +111,7 @@ function dsmapredopen(njobs,target,conf)
      % begin writing the script that will be run via qsub. 
      mlpipe=[distprocdir '/mlpipe' num2str(i)];
      fprintf(fid, '%s\n',['#!/bin/bash'] );
+     fprintf(fid, '%s\n',['export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/ebs1/mklinstall/composer_xe_2013.1.117/mkl/lib/intel64/:/code/forresti/caffe-berkeley/src/stitch_pyramid/;'] );
      fprintf(fid, '%s\n',['cd "' pwd '";'] );
      fprintf(fid, '%s\n',['runtail=1;']);
      fprintf(fid, '%s\n',['if [[ ! -p ' mlpipe ' ]]; then']);
@@ -213,6 +214,7 @@ function submitchunk(chunk,qsubopts,chunkid,target)
          fclose(fid)
        end
        qsub_cmd=['source /etc/profile; qsub -V -N dsmapreducer' num2str(chunkid) ' ' qsubopts ' ' logstring ' ' submitScr]
-       ssh_cmd = sprintf(['ssh ' target ' ''%s'''], qsub_cmd)
+       ssh_cmd = sprintf(['echo ''%s'' | ssh ' target ' ''bash -s'''], qsub_cmd)
+       %ssh_cmd = sprintf(['ssh ' target ' ''%s'''], qsub_cmd)
        unix(ssh_cmd);
 end
