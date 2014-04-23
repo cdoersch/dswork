@@ -1,6 +1,10 @@
 function [maxprogress createddirs]=dsmapreducerrollback()
   global ds;
   createddirs=[];
+  if(~isfield(ds,'sys'))
+    maxprogress=0;
+    return
+  end
   if(isfield(ds.sys,'saved'))
     for(i=1:size(ds.sys.saved,1))
       if(iscell(ds.sys.saved{i,2}) || isstruct(ds.sys.saved{i,2}))

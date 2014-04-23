@@ -50,7 +50,7 @@ dswork doesn't clear variables that are written
 
 dsdelete('ds.init*') deletes ds.isinit
 
-dsdelete('ds.a') crashes because it's a single character
+//dsdelete('ds.a') crashes because it's a single character
 
 start a dsmapreduce that crashes during reduce.  on dscompletereduce, crashes result in results not getting loaded.  most likely the results from the crashed jobs.  also, progress values don't seem to get read, and get things stuck on the next dsdistprocmgr
 
@@ -77,3 +77,7 @@ dsup does not handle cell arrays correctly
 if dswork is writing things that repeat, keep going (don't keyboard), but exit with error once things are done...better yet, dsup should not work in distributed mode.
 
 found something still running error (e.g. when we run out of disk space).  should be handled via drop-to-command-line.
+
+if something repeatedly crashes, provide way to restart them cleanly.  current thing will leave progressfiles
+
+mapreduce doesn't pick up new hosts; running dsmapreduce before running dsrundistributed will cause no hosts to be found.

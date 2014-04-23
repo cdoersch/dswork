@@ -22,7 +22,7 @@ function dscompletemapreduce(startfresh)
     ds.sys.distproc.nextfile=ones(size(ds.sys.distproc.nextfile));
     ds.sys.distproc.hascleared=false(ds.sys.distproc.nmapreducers,1);
     %ds.sys.distproc.jobsinq=1:ds.sys.distproc.njobs;
-    ds.sys.distproc.jobprogress=[];
+    %ds.sys.distproc.jobprogress=[];
     ds.sys.distproc.reducestarted=1;
   end
   if(isfield(ds.sys.distproc,'mapvars'))

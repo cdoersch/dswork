@@ -137,7 +137,7 @@ function dsdistprocmgr(startfresh)
     workingprocs=setdiff(setdiff(myslaves,ds.sys.distproc.idleprocs),ds.sys.distproc.hdead);
     disp(['working procs: ' num2str(workingprocs(:)')]);
     disp([num2str(numel(ds.sys.distproc.idleprocs)) ' idle.']);
-    ds.sys.distproc.jobprogress(max(ds.sys.distproc.jobsinq)+1)=0;
+    %ds.sys.distproc.jobprogress(max(ds.sys.distproc.jobsinq)+1)=0;
     if(any(ds.sys.distproc.jobprogress(ds.sys.distproc.jobsinq)))
       keyboard;
     end
@@ -535,6 +535,9 @@ function [ds, gotinterrupt] = readslave_atomic(ds,idx,isrunning,loadresults,hand
     if(any(ds.sys.distproc.jobprogress(gotcompletion)==0))
       keyboard;
     end
+  end
+  if(size(ds.sys.distproc.jobsproc,2)~=numel(unique(ds.sys.distproc.jobsproc(1,:))))
+    keyboard
   end
   catch ex,dsprinterr_noglobal;end
 end

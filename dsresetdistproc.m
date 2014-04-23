@@ -21,7 +21,7 @@ function resetdistproc();
   ds.sys.distproc.uniqueredvars={};
   ds.sys.distproc.nloads=[];
   ds.sys.distproc.totalloadtime=[];
-  ds.sys.distproc.jobprogress=[];
+  %ds.sys.distproc.jobprogress=[];
   ds.sys.distproc.assignmentlog=[];
   ds.sys.distproc.reducemodulo=0;
   ds.sys.distproc.mapvars={};

@@ -58,5 +58,7 @@ function dsdistprocmapvars(mapvars)
     error('cannot determine the number of parallel jobs.');
   end
   ds.sys.distproc.njobs=njobs;
-  ds.sys.distproc.jobsinq=1:ds.sys.distproc.njobs
+  ds.sys.distproc.jobsinq=1:ds.sys.distproc.njobs;
+  ds.sys.distproc.jobprogress=[];
+  ds.sys.distproc.jobprogress(ds.sys.distproc.jobsinq)=0;
 end

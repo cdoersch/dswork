@@ -214,11 +214,14 @@ try
         chmodeach=(ntosave/ntotal)<.05;
         %fisempty=cellfun(@(x) isempty(x),f(brakidx{1},brakidx{2}));
         fnosv=(marks2(brakidx{1},brakidx{2}));%(zeros(brakidx{1},brakidx{2})>0);
-        for(i=numel(brakidx{2}):-1:1)
-          for(j=numel(brakidx{1}):-1:1)
-            fnosv(j,i)=(fnosv(j,i)||isempty(f{brakidx{1}(j),brakidx{2}(i)}));
-          end
-        end
+        fnosv=fnosv|cellfun(@isempty,f(brakidx{1},brakidx{2}));
+        %tic
+        %for(i=numel(brakidx{2}):-1:1)
+        %  for(j=numel(brakidx{1}):-1:1)
+        %    fnosv(j,i)=(fnosv(j,i)||isempty(f{brakidx{1}(j),brakidx{2}(i)}));
+        %  end
+        %end
+        %toc
         if(all(fnosv))
           return;
         end
@@ -267,8 +270,9 @@ try
                 %  marks2{i}=1;
                 %elseif(~movesonly)
                   snm=['data' num2str(j)];
-                  eval([snm '=f{j,i};']);
-                  s=whos(snm);
+                  %eval([snm '=f{j,i};']);
+                  savedata{j}=f{j,i};
+                  %s=whos(snm);
                   %if([s.bytes]>=1000000000)
                     %in my experience, -v7.3 is less stable, so only 
                     %use it when really necessary
@@ -316,16 +320,20 @@ try
               %keyboard;
               tic
               currvarstosave=varstosave(k:modulo:end);
+              currsavedata=[{contents} savedata(k:modulo:end)];
               for(m=numel(currvarstosave):-1:1)
                 if(isempty(currvarstosave{m}))
                   currvarstosave(m)=[];
                 end
               end
-              args=[{'contents'} currvarstosave appendswitch v73switch];
+              varnms=[{'contents'} currvarstosave];
+              args=[appendswitch v73switch];
+              %args=[{'contents'} currvarstosave appendswitch v73switch];
               checkpassed=0;
               while(~checkpassed)
                 tic
-                save(filenm,args{:});
+                s1=cell2struct(currsavedata,varnms,2);
+                save(filenm,'-struct','s1',args{:});
                 toc
                 checkpassed=(~checksaves)||checksave(filenm,varstosave);
               end
