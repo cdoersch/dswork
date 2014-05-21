@@ -324,6 +324,7 @@ try
               for(m=numel(currvarstosave):-1:1)
                 if(isempty(currvarstosave{m}))
                   currvarstosave(m)=[];
+                  currsavedata(m+1)=[];
                 end
               end
               varnms=[{'contents'} currvarstosave];
