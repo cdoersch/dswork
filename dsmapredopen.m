@@ -77,6 +77,7 @@ function dsmapredopen(njobs,target,conf)
   ds.sys.distproc.hostname=num2cell(char(ones(njobs,1,'uint8').*uint8('?')))';
   ds.sys.distproc.commlinkmaster=cell(njobs,1);
   ds.sys.distproc.commlinkslave=cell(njobs,1);
+  ds.sys.distproc.commlinkinterrupt=cell(njobs,1);
   ds.sys.distproc.progresslink=cell(njobs,1);
   ds.sys.distproc.allslaves=[];
   ds.sys.distproc.availslaves=[];
@@ -96,6 +97,7 @@ function dsmapredopen(njobs,target,conf)
   dssave();
   currchunk={};
   nchunks=1;
+  libs=getenv('$LD_LIBRARY_PATH');
   for(i=1:njobs)
      %generate the script.
      disp(['submitting job ' num2str(i)]);
@@ -111,7 +113,11 @@ function dsmapredopen(njobs,target,conf)
      % begin writing the script that will be run via qsub. 
      mlpipe=[distprocdir '/mlpipe' num2str(i)];
      fprintf(fid, '%s\n',['#!/bin/bash'] );
-     fprintf(fid, '%s\n',['export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/ebs1/mklinstall/composer_xe_2013.1.117/mkl/lib/intel64/:/code/forresti/caffe-berkeley/src/stitch_pyramid/;'] );
+     % some qsub systems refuse to forward the LD_LIBRARY_PATH, so we do it ourselves.
+     if(~isempty(libs))
+       fprintf(fid, '%s\n',['TMP_LIBRARY_PATH=$LD_LIBRARY_PATH:' libs] );
+       fprintf(fid, '%s\n',['export LD_LIBRARY_PATH=$(awk ''BEGIN{ORS=":";RS="[:\n]"}!a[$0]++'' <<<"${TMP_LIBRARY_PATH%:}");'] );
+     end
      fprintf(fid, '%s\n',['cd "' pwd '";'] );
      fprintf(fid, '%s\n',['runtail=1;']);
      fprintf(fid, '%s\n',['if [[ ! -p ' mlpipe ' ]]; then']);
@@ -213,7 +219,7 @@ function submitchunk(chunk,qsubopts,chunkid,target)
          fprintf(fid, '%s\n','wait;' );
          fclose(fid)
        end
-       qsub_cmd=['source /etc/profile; qsub -V -N dsmapreducer' num2str(chunkid) ' ' qsubopts ' ' logstring ' ' submitScr]
+       qsub_cmd=['source /etc/profile; qsub -V -N dsjob' num2str(chunkid) ' ' qsubopts ' ' logstring ' ' submitScr]
        ssh_cmd = sprintf(['echo ''%s'' | ssh ' target ' ''bash -s'''], qsub_cmd)
        %ssh_cmd = sprintf(['ssh ' target ' ''%s'''], qsub_cmd)
        unix(ssh_cmd);

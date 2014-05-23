@@ -7,7 +7,7 @@
    global ds;
    cmd=struct();
    cmd.name='restart';
-   for(i=1:numel(ds.sys.distproc.commlinkslave))
+   for(i=ds.sys.distproc.availslaves(:)')%1:numel(ds.sys.distproc.commlinkslave))
      save(ds.sys.distproc.commlinkslave{i},'cmd');
    end
    disp('waiting for mapreducers to restart...');

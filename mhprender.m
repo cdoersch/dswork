@@ -38,11 +38,12 @@
 % them dynamically.
 %
 % Includes are not yet supported, but hopefully will be eventually.
-function mhprender(mhpfile,outpath,argv)
+function mhprender(mhpfile,outpath,argv,paths)
   try
   if(~exist('argv','var'))
     argv=struct();
   end
+  %fieldnames(paths);
   global ds;
   global ds_html;
   ds_html={};
@@ -110,7 +111,7 @@ function mhprender(mhpfile,outpath,argv)
           toparse=lin(2:fin(1)-1);
           lin=lin(fin(1)+2:end);
           if(typechar=='~')
-            outl=[outl parse_dsref(toparse,i)];
+            outl=[outl parse_dsref(toparse,i,paths)];
           else
             outl=[outl parse_var(toparse,i)];
           end
@@ -151,13 +152,13 @@ function mhprender(mhpfile,outpath,argv)
   if(~isempty(slashpos))
     mfile=mfile(slashpos(end)+1:end);
   end
-  htmlout=runfile(mfile(1:end-2),argv,outdirpath);
+  htmlout=runfile(mfile(1:end-2),argv,outdirpath,paths);
   disp('donerun')
   dsup(outpath,htmlout);
   catch ex,dsprinterr;end
 end
 
-function res=parse_dsref(toparse,lineno)
+function res=parse_dsref(toparse,lineno,paths)
   pos=strfind(toparse,'{');
   res={};
   idxind='';
@@ -175,7 +176,20 @@ function res=parse_dsref(toparse,lineno)
     res{1}=['ds_idxstr=' idxstr ';']
     idxind=' ''{'' num2str(ds_idxstr) ''}''';
   end
-  res{end+1}=['ds_html{end+1}=dsreldiskpath([''' toparse '''' idxind '],outdirpath);'];
+  toparse=strtrim(toparse);
+  %if(dshasprefix(toparse,'paths'))
+  %  parsepth=paths;
+  %  while(~ischar(parsepth))
+  %    
+  %    if(isstruct(parsepth))
+  %      
+  %    end
+  %  end
+  %elseif(~dshasprefix(toparse,'ds'))
+  %  error(['line ' num2str(lineno) ': invalid path ' toparse]);
+  %end
+  res{end+1}=['ds_parsepth=paths'];
+  res{end+1}=['ds_html{end+1}=dsreldiskpath([dsparsepath(''' toparse ''',paths) ' idxind '],outdirpath);'];
   res{end+1}=['if(numel(ds_html{end})>0),ds_html{end}=ds_html{end}{1};else,ds_html{end}='''';end'];
 end
 
@@ -189,7 +203,7 @@ function str=escape(str)
   str=strrep(str,'%','%%');
 end
 
-function ds_reshtml=runfile(mfile,argv,outdirpath)
+function ds_reshtml=runfile(mfile,argv,outdirpath,paths)
 try
   global ds_html;
   global ds;

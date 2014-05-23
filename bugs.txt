@@ -81,3 +81,7 @@ found something still running error (e.g. when we run out of disk space).  shoul
 if something repeatedly crashes, provide way to restart them cleanly.  current thing will leave progressfiles
 
 mapreduce doesn't pick up new hosts; running dsmapreduce before running dsrundistributed will cause no hosts to be found.
+
+dsmapredopen follwed immediately by dsmapredrestart--seems to not wait for dsmapredrestart to finish
+
+segfault on map phase of mapreduce will still allow map to finish and reduce to start
