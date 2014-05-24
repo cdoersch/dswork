@@ -43,6 +43,9 @@ function mhprender(mhpfile,outpath,argv,paths)
   if(~exist('argv','var'))
     argv=struct();
   end
+  if(~exist('paths','var'))
+    paths=struct();
+  end
   %fieldnames(paths);
   global ds;
   global ds_html;
