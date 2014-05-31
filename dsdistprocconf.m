@@ -13,4 +13,7 @@ function dsparallelreadconf(conf)
   if(isfield(conf,'maxperhost'))
     ds.sys.distproc.maxperhost=conf.maxperhost;
   end
+  if(isfield(conf,'waitforstart'))
+    ds.sys.distproc.waitforstart=conf.waitforstart;
+  end
 end
