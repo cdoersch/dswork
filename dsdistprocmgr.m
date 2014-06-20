@@ -135,6 +135,11 @@ function dsdistprocmgr(startfresh)
       myslaves=ds.sys.distproc.availslaves;
     end
     workingprocs=setdiff(setdiff(myslaves,ds.sys.distproc.idleprocs),ds.sys.distproc.hdead);
+    if(dsbool(ds.sys.distproc,'waitforstart')&&numel(ds.sys.distproc.availslaves)~=numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.notresponding))
+      disp(['waiting for ' num2str(numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.availslaves)-numel(ds.sys.distproc.notresponding)) ' procs to start']);
+      loaduntiltimeout(3);
+      continue;
+    end
     disp(['working procs: ' num2str(workingprocs(:)')]);
     disp([num2str(numel(ds.sys.distproc.idleprocs)) ' idle.']);
     %ds.sys.distproc.jobprogress(max(ds.sys.distproc.jobsinq)+1)=0;
@@ -383,6 +388,7 @@ function [ds, gotinterrupt] = readslave_atomic(ds,idx,isrunning,loadresults,hand
             %error('mapreducer started that was already available');
             %catch ex; dsprinterr;end
             disp(['mapreducer ' num2str(idx) ' started that was already available']);
+            keyboard
         end
         delete([ds.sys.distproc.progresslink{idx} '_' num2str(ds.sys.distproc.nextfile(idx)) '.mat']);
         ds.sys.distproc.hascleared(idx)=false;

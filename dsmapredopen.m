@@ -97,7 +97,7 @@ function dsmapredopen(njobs,target,conf)
   dssave();
   currchunk={};
   nchunks=1;
-  libs=getenv('$LD_LIBRARY_PATH');
+  libs=getenv('LD_LIBRARY_PATH');
   for(i=1:njobs)
      %generate the script.
      disp(['submitting job ' num2str(i)]);
