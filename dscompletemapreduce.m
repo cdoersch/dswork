@@ -1,6 +1,7 @@
 function dscompletemapreduce(startfresh)
   global ds;
   ds.sys.distproc.hcrashct=zeros(size(ds.sys.distproc.hcrashct));
+  ds.sys.distproc.idleprocs=[ds.sys.distproc.idleprocs ds.sys.distproc.hdead];
   ds.sys.distproc.hdead=[];
   ds.sys.distproc.donotassociate=zeros(2,0);
   if(~exist('startfresh','var'))

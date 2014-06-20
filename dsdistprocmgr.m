@@ -282,6 +282,10 @@ end
 
 function ds=prepjob_atomic(ds,filenm,cmd,availjiqidx,i)
   ds.sys.distproc.jobsinq(availjiqidx)=[];
+  if(numel(cmd.inds)==0)
+    disp('inds cannot be empty');
+    error('inds cannot be empty');
+  end
   ds.sys.distproc.jobsproc=[ds.sys.distproc.jobsproc [cmd.inds(:)'; ones(1,numel(cmd.inds))*i]];
   ds.sys.distproc.assignmentlog=[ds.sys.distproc.assignmentlog [cmd.inds(:)'; ones(1,numel(cmd.inds))*i]];
   ds.sys.distproc.idleprocs(ds.sys.distproc.idleprocs==i)=[];
