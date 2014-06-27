@@ -31,7 +31,10 @@
 %
 function dsup(ds_matchstr,ds_src)
 global ds
-evalin('caller',[ds_matchstr '=ds_src;']);
+evalin('caller','global ds;');
+assignin('caller','ds_tmp_afvdfb',ds_src);
+evalin('caller',[ds_matchstr '=ds_tmp_afvdfb;']);
+evalin('caller','clear ds_tmp_afvdfb;');
 if(sum(ds_matchstr=='{')>0)
   ds_brakpos=find(ds_matchstr=='{');
   ds_idxstr=ds_matchstr((ds_brakpos(1)+1):(end-1));
