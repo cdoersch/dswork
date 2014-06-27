@@ -1,33 +1,47 @@
 % Author: Carl Doersch (cdoersch at cs dot cmu dot edu)
 %
 % Update a variable in the ds struct, and force it to be saved
-% the next time dssave is called.  2-d cell arrays are not supported.
+% the next time dssave is called.  
 %
 % Ideally, any piece of code of the following form:
 %
-% [expr1] = [expr2]
+% ds.[expr1] = [expr2]
 %
-% where [expr1] is somewhere in dswork, the following code will have
-% exactly the same effect, except the changes will be written to disk
-% at the next call to dssave:
+% where [expr1] references a variable in dswork, saved or not, the 
+% following code will have exactly the same effect, except the changes 
+% will be written to disk at the next call to dssave:
 %
-% {'[expr1]','[expr2]'};dsup;
-%
-% The odd syntax is necessary because [expr2], as well as any indexing
-% expressions in [expr1] are evaluated in the calling workspace.  
+% dsup('ds.[expr1]',[expr2]);
 %
 % In practice, there are restrictions on the form of [expr1] because
 % this code was written in a limited amount of time.  [expr1] is
-% expected to have the form 'ds.[expr3]' or 'ds.[expr3]{[expr4]}', where [expr3] is
+% expected to be a simple struct reference (i.e. 'ds.[expr3]') or a simple
+% struct reference followed by a cell index (i.e. 'ds.[expr3]{[expr4]}'), where [expr3] is
 % a series of valid variable names separated by dots (to designate a field of
-% a struct), and [expr4] can be anything, as long as the opening and close brackets
-% actually match each other, but it must evaluate to an array of integers.  
-% Note that extra whitespace is not handled, nor is 2d array indexing.
+% a struct), and [expr4] must evaluate to an array of integers.  
+% it may reference variables in the caller workspace, but the end keyword 
+% is not supported. Note that extra whitespace is not handled outside of expr4, nor 
+% is 2d array indexing.
+%
+% You should usually avoid using this function in your code; it's more provided
+% as a convenience for manipulating the state of dswork from the command line.
+% In distributed code, it's usually a bad idea to ever update variables on disk
+% (especially if they're small enough to fit in memory), since it will prevent
+% you from re-running things when they fail.
 %
 function dsup(ds_matchstr,ds_src)
 global ds
-eval([ds_matchstr '=ds_src;']);
-dssplitmatchstrscript;
+evalin('caller',[ds_matchstr '=ds_src;']);
+if(sum(ds_matchstr=='{')>0)
+  ds_brakpos=find(ds_matchstr=='{');
+  ds_idxstr=ds_matchstr((ds_brakpos(1)+1):(end-1));
+  ds_matchstr=ds_matchstr(1:(ds_brakpos-1));
+  ds_brakidx=evalin('caller',['[' ds_idxstr ']']);
+else
+  ds_brakidx=[];
+end
+
+%dssplitmatchstrscript;
 %[ds_targ ds_brakidx]=dssplitmatchstr(ds_targ);
 ds_dotpos=find(ds_matchstr=='.');
 ds_pfx=ds_matchstr(1:(ds_dotpos(1)-1));
