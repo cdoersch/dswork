@@ -51,10 +51,10 @@ function dsdistprocmgr(startfresh)
     warning on all;
   end
 
-  if(~dsbool(ds.sys.distproc,'reducemodulo')&&dsbool(ds.sys.distproc,'mapreducing'))
-    ds.sys.distproc.reducemodulo=numel(ds.sys.distproc.availslaves);
-    ds.sys.distproc.forcerunsetlater=ds.sys.distproc.availslaves;
-  end
+  %if(~dsbool(ds.sys.distproc,'reducemodulo')&&dsbool(ds.sys.distproc,'mapreducing'))
+  %  ds.sys.distproc.reducemodulo=numel(ds.sys.distproc.availslaves);
+  %  ds.sys.distproc.forcerunsetlater=ds.sys.distproc.availslaves;
+  %end
 
   if(dsfield(ds.sys.distproc,'forcerunset'))
     myslaves=ds.sys.distproc.forcerunset;
@@ -74,25 +74,25 @@ function dsdistprocmgr(startfresh)
   %  end
   %  myslaves(flag)=[];
   %end
-  cmd.savestate=ds.sys.savestate;
-  cmd.currpath=ds.sys.currpath;
-  cmd.matlabpath=path;
+  scmd.savestate=ds.sys.savestate;
+  scmd.currpath=ds.sys.currpath;
+  scmd.matlabpath=path;
   if(dsfield(ds.sys.distproc,'localdir'))
-    cmd.localdir=ds.sys.distproc.localdir;
+    scmd.localdir=ds.sys.distproc.localdir;
   else
-    cmd.localdir='';
+    scmd.localdir='';
   end
-  cmd.matlabpath=path;
-  cmd.reducemodulo=ds.sys.distproc.reducemodulo;
-  cmd.reducehosts=ds.sys.distproc.hostname(myslaves);
+  %cmd.matlabpath=path;
+  %cmd.reducemodulo=ds.sys.distproc.reducemodulo;
+  %cmd.reducehosts=ds.sys.distproc.hostname(myslaves);
   if(~dsfield(ds.sys.distproc,'reducevars'))
     ds.sys.distproc.reducevars={};
   end
   if(~dsfield(ds.sys.distproc,'mapvars'))
     ds.sys.distproc.mapvars={};
   end
-  cmd.clearlocaldir=0;%isempty(ds.sys.distproc.reducevars);
-  save([ds.sys.outdir 'ds/sys/distproc/savestate.mat'],'cmd','-v7.3');
+  %cmd.clearlocaldir=0;%isempty(ds.sys.distproc.reducevars);
+  %save([ds.sys.outdir 'ds/sys/distproc/savestate.mat'],'cmd','-v7.3');
   runthisround=[];
   for(i=1:50)
     cleaners{i}=onCleanup(@handleinterrupt);
@@ -139,6 +139,23 @@ function dsdistprocmgr(startfresh)
       disp(['waiting for ' num2str(numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.availslaves)-numel(ds.sys.distproc.notresponding)) ' procs to start']);
       loaduntiltimeout(3);
       continue;
+    end
+
+    if(~dsbool(ds.sys.distproc,'reducemodulo')&&dsbool(ds.sys.distproc,'mapreducing'))
+      if(dsfield(ds.sys.distproc,'forcerunset'))
+        ds.sys.distproc.reducemodulo=numel(ds.sys.distproc.forcerunset);
+        ds.sys.distproc.forcerunsetlater=ds.sys.distproc.forcerunset;
+        myslaves=ds.sys.distproc.forcerunset;
+      else
+        ds.sys.distproc.reducemodulo=numel(ds.sys.distproc.availslaves);
+        ds.sys.distproc.forcerunsetlater=ds.sys.distproc.availslaves;
+        myslaves=ds.sys.distproc.availslaves;
+      end
+    end
+    if(exist('scmd','var'))
+      scmd.reducehosts=ds.sys.distproc.hostname(myslaves);
+      dstrysave([ds.sys.outdir 'ds/sys/distproc/savestate.mat'],scmd,'-v7.3');
+      clear scmd;
     end
     disp(['working procs: ' num2str(workingprocs(:)')]);
     disp([num2str(numel(ds.sys.distproc.idleprocs)) ' idle.']);

@@ -1,5 +1,5 @@
 % Author: Carl Doersch (cdoersch at cs dot cmu dot edu)
-function dstrysave(filenm,cmd)
+function dstrysave(filenm,cmd,varargin)
 %  if(exist(filenm,'file'))
    global ds;
     iserror=0;
@@ -14,7 +14,7 @@ function dstrysave(filenm,cmd)
       try
         checkpassed=false;
         while(~checkpassed)
-          save(filenm,'cmd');
+          save(filenm,'cmd',varargin{:});
           iserror=-1;
           checkpassed=(~dsbool(ds,'conf','checksaves'))||checksave(filenm,'''cmd''')
         end
