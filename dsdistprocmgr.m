@@ -107,7 +107,7 @@ function dsdistprocmgr(startfresh)
     wait=1;
     if(ds.sys.distproc.allatonce)
       [~,idx]=ismember(ds.sys.distproc.hostname(setdiff(ds.sys.distproc.possibleslaves,ds.sys.distproc.hdead)),unique(ds.sys.distproc.hostname));
-      totalprocs=sum(min(histc(idx,1:numel(unique(ds.sys.distproc.hostname))),ds.sys.distproc.maxperhost));
+      totalprocs=sum(min(histc(idx,1:numel(unique(ds.sys.distproc.hostname))),floor(ds.sys.distproc.maxperhost)));
       jobsthisround=ceil(numel(ds.sys.distproc.jobsinq)/totalprocs);
     else
       jobsthisround=ceil(numel(ds.sys.distproc.jobsinq)/(2*(numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.hdead))));
@@ -166,7 +166,7 @@ function dsdistprocmgr(startfresh)
     for(i=ds.sys.distproc.idleprocs(:)')
       if(numel(ds.sys.distproc.jobsinq)>0)
         %[~,uhostind]=ismember(ds.sys.distproc.hostnames(i),ds.sys.distproc.uniquehosts);
-        if(numel(getrunningperhost(ds.sys.distproc.hostname{i}))>=ds.sys.distproc.maxperhost)
+        if(numel(getrunningperhost(ds.sys.distproc.hostname{i}))>=floor(ds.sys.distproc.maxperhost))
           idleprocsidx=idleprocsidx+1;
           continue;
         end

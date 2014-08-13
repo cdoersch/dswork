@@ -152,9 +152,9 @@ while(1)
       ds.sys.distproc.mapreducer=1;
       ds.sys.distproc.mapreducerid=dsdistprocid;
       dssetlocaldir(scmd.localdir);
-      if(scmd.clearlocaldir&&dsfield(ds.sys.distproc,'localdir'))
-        unix(['rm ' scmd.localdir '*']);%TODO: this isn't necessarily synchronized. should really create a new directory for every mapreduce.
-      end
+      %if(scmd.clearlocaldir&&dsfield(ds.sys.distproc,'localdir'))
+      %  unix(['rm ' scmd.localdir '*']);%TODO: this isn't necessarily synchronized. should really create a new directory for every mapreduce.
+      %end
       if(isfield(scmd,'reducehosts'))
         ds.sys.distproc.reducehosts=scmd.reducehosts;
       end

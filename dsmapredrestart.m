@@ -7,6 +7,8 @@
    global ds;
    cmd=struct();
    cmd.name='restart';
+   unix(['rm -f ' ds.sys.outdir 'ds/sys/distproc/progress*']);
+   unix(['rm -f ' ds.sys.outdir 'ds/sys/distproc/master*']);
    for(i=ds.sys.distproc.availslaves(:)')%1:numel(ds.sys.distproc.commlinkslave))
      save(ds.sys.distproc.commlinkslave{i},'cmd');
    end

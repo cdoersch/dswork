@@ -89,3 +89,5 @@ segfault on map phase of mapreduce will still allow map to finish and reduce to 
 if a worker appends to a file (i.e. a 2d array) then crashes, roll back will delete the whole file.
 
 data1=dsload('ds.r2.*{1}'); does not work: throws exception since output is never assigned
+
+it appears to be possible for roll back to delete things that are marked as saved in the root savestate.
