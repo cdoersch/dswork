@@ -136,7 +136,7 @@ function dsdistprocmgr(startfresh)
     end
     workingprocs=setdiff(setdiff(myslaves,ds.sys.distproc.idleprocs),ds.sys.distproc.hdead);
     if(dsbool(ds.sys.distproc,'waitforstart')&&numel(ds.sys.distproc.availslaves)~=numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.notresponding))
-      disp(['waiting for ' num2str(numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.availslaves)-numel(ds.sys.distproc.notresponding)) ' procs to start']);
+      disp(['waiting for ' num2str(numel(ds.sys.distproc.possibleslaves)-numel(ds.sys.distproc.availslaves)-numel(ds.sys.distproc.notresponding)) ' workers to start']);
       loaduntiltimeout(3);
       continue;
     end
@@ -157,7 +157,7 @@ function dsdistprocmgr(startfresh)
       dstrysave([ds.sys.outdir 'ds/sys/distproc/savestate.mat'],scmd,'-v7.3');
       clear scmd;
     end
-    disp(['working procs: ' num2str(workingprocs(:)')]);
+    disp(['working workers: ' num2str(workingprocs(:)')]);
     disp([num2str(numel(ds.sys.distproc.idleprocs)) ' idle.']);
     %ds.sys.distproc.jobprogress(max(ds.sys.distproc.jobsinq)+1)=0;
     if(any(ds.sys.distproc.jobprogress(ds.sys.distproc.jobsinq)))
@@ -332,6 +332,10 @@ function gotinterrupt=readslave(idx,isrunning,loadresults,handlinginterrupt)
   [ds, gotinterrupt]=readslave_atomic(ds,idx,isrunning,loadresults,handlinginterrupt);
   while(numel(ds.sys.distproc.filestodelete)>0)
     delete(ds.sys.distproc.filestodelete{1});
+    if(~isfield(ds.sys.distproc,'filesdeleted'))
+      ds.sys.distproc.filesdeleted={};
+    end
+    ds.sys.distproc.filesdeleted{end+1}=ds.sys.distproc.filestodelete(1);
     ds.sys.distproc.filestodelete(1)=[];
   end
 end
@@ -478,6 +482,7 @@ function [ds, gotinterrupt] = readslave_atomic(ds,idx,isrunning,loadresults,hand
             keyboard;
           end
         end
+        ds.sys.distproc.hascleared(idx)=0;
         dsstacktrace(cmd.err,1);
         if(dsbool(ds,'conf','rethrowerrors'))
           global ds_nocatch;
@@ -537,6 +542,7 @@ function [ds, gotinterrupt] = readslave_atomic(ds,idx,isrunning,loadresults,hand
     if(any(~ismember({fils.name},ds.sys.distproc.filestodelete)))
       error('found something still running!  Run dinterrupt to stop it...');
     end
+    ds.sys.distproc.filesdeleted={};
   end
   if(exist(ds.sys.distproc.commlinkslave{idx},'file'))
     ds.sys.distproc.commfailures(idx)=ds.sys.distproc.commfailures(idx)+1;

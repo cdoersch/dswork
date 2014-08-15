@@ -113,7 +113,8 @@ while(1)
   elseif(strcmp(mycmd.name,'restart'))
     disp('got restart signal')
     ds.exit=2;
-    exit(ds.exit-1);
+    return
+    %exit(ds.exit-1);
   elseif(strcmp(mycmd.name,'run'))
     mycmd
     %ds.sys.distproc.wrotemaster=false;
