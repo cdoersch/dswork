@@ -124,7 +124,7 @@ for(dslf_idx=1:numel(cfnam))
             end
             clear contents;
             if(~isempty(brakidx{1}))
-              dslf_brakidx{1}=sort(intersect(dslf_rows,brakidx{2}),'descend')
+              dslf_brakidx{1}=sort(intersect(dslf_rows,brakidx{1}),'descend')
             else
               dslf_brakidx{1}=sort(dslf_rows,'descend');
             end

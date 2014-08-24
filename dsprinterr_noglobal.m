@@ -18,10 +18,12 @@
 ismapreducer=dsbool(ds,'sys','distproc','mapreducer');
 if(~ismapreducer)
   dsstacktrace(ex);
-  cwd=dspwd;
-  if(~strcmp(cwd,'.ds'));
-    disp(['WARNING: current ds wd is: ' cwd '!!']);
-  end
+  try
+    cwd=dspwd;
+    if(~strcmp(cwd,'.ds'));
+      disp(['WARNING: current ds wd is: ' cwd '!!']);
+    end
+  catch,end
   if(isdeployed)
       disp('dskeyboard. use rethrow(ex) to get back to prompt');
     rethrow(ex);

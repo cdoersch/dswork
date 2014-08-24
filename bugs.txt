@@ -95,3 +95,5 @@ it appears to be possible for roll back to delete things that are marked as save
 generate pretty error message when too many workers have crashed
 
 ask for confirmation when starting mapreduce or exiting without closing distributed session
+
+allatonce doesn't work on a single machine
