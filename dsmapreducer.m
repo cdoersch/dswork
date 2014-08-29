@@ -137,11 +137,12 @@ while(1)
       upaths=regexp(paths,':','split');
       tic
       warning off all;
+      mypaths=regexp(path,':','split');
       if(~isdeployed)
         matpath=which('pwd');
         matpath=matpath(1:end-numel('toolbox/matlab/general/pwd.m'));
         for(i=1:numel(upaths))
-          if((~dshasprefix(upaths{i},matpath)))%'/afs/cs.cmu.edu/misc/matlab/'))&&(~dshasprefix(upaths{i},'/opt/matlab/'))&&(~dshasprefix(upaths{i},'/usr/local/lib/matlab7/')))
+          if((~dshasprefix(upaths{i},matpath))&&~ismember(upaths{i},mypaths))%'/afs/cs.cmu.edu/misc/matlab/'))&&(~dshasprefix(upaths{i},'/opt/matlab/'))&&(~dshasprefix(upaths{i},'/usr/local/lib/matlab7/')))
             disp(['adding path ' upaths{i}])
             addpath(upaths{i});
           end
