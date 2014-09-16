@@ -237,6 +237,10 @@ function dsdistprocmgr(startfresh)
   %end
   disp('loading final results...');
   loaduntiltimeout(Inf);
+  if(~isempty(dir([ds.sys.outdir '/ds/sys/distproc/progress*'])))
+    disp('finished with extra progress files');
+    keyboard
+  end
   ds.sys.distproc.interruptexiting=true;
   %loaduntiltimeout(Inf,reducevars2);
   delete([ds.sys.outdir 'ds/sys/distproc/savestate.mat']);
@@ -482,7 +486,9 @@ function [ds, gotinterrupt] = readslave_atomic(ds,idx,isrunning,loadresults,hand
             keyboard;
           end
         end
+        % the crash might actually be due to an out-of-sync savestate.mat.  This will tell the worker to reload it.
         ds.sys.distproc.hascleared(idx)=0;
+        ds.sys.distproc.nextfile(idx)=1;
         dsstacktrace(cmd.err,1);
         if(dsbool(ds,'conf','rethrowerrors'))
           global ds_nocatch;

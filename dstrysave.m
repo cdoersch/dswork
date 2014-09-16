@@ -16,7 +16,7 @@ function dstrysave(filenm,cmd,varargin)
         while(~checkpassed)
           save(filenm,'cmd',varargin{:});
           iserror=-1;
-          checkpassed=(~dsbool(ds,'conf','checksaves'))||checksave(filenm,'''cmd''')
+          checkpassed=(~dsbool(ds,'conf','checksaves'))||checksave(filenm,'''cmd''');
         end
 %        cmd=val.cmd;
       catch ex
@@ -27,6 +27,7 @@ function dstrysave(filenm,cmd,varargin)
         end
       end
     end
+    disp(['wrote ' filenm]);
     %if(dsbool(ds,'conf','checksaves'))
       movefile(filenm,ofil,'f');
     %end

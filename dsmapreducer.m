@@ -40,6 +40,7 @@ if(~exist('ds','var'))
   ds.sys.distproc.myhost=cmd.host;
   disp(['running on ' cmd.host]);
   save(commlinkout,'cmd');
+  disp(['wrote ' commlinkout]);
   ds.sys.distproc.lastprocessedserial=-1;
 else
 %we just restarted because we got an interrupt.
@@ -61,6 +62,7 @@ else
     [cmd.maxprogress cmd.createddirs]=dsmapreducerrollback();
     cmd.name='interrupted';
     save(commlinkout,'cmd');
+    disp(['wrote ' commlinkout]);
   end
   [~,host]=unix('hostname');
   ds.sys.distproc.myhost=host(1:end-1);;
@@ -73,6 +75,7 @@ while(1)
       disp('got exit signal')
       cmd.name='exited';
       save(commlinkout,'cmd');
+      disp(['wrote ' commlinkout]);
       disp('dskeeprunning:cuetoexit');
       ds.exit=1;
       exit(ds.exit-1);
@@ -107,6 +110,7 @@ while(1)
     cmd.name='exit';
     cmd.name='exited';
     save(commlinkout,'cmd');
+    disp(['wrote ' commlinkout]);
     disp('dskeeprunning:cuetoexit');
     ds.exit=1;
     exit(ds.exit-1);

@@ -103,6 +103,7 @@ function ds=dsfinishjob(ds,inds,idxstr,progressfile,commlinkout,completed,islast
     %ds.sys.saved(:,3)=num2cell(ones(size(ds.sys.saved,1),1)*jid);
     cmd.completed=completed;
     save([progressfile '_' num2str(ds.sys.distproc.nextfile) '.mat'],'cmd');
+    disp(['wrote ' progressfile '_' num2str(ds.sys.distproc.nextfile) '.mat']);
     ds.sys.saved={};
     ds.sys.savedjid={};
     ds.sys.distproc.nextfile=ds.sys.distproc.nextfile+1;
