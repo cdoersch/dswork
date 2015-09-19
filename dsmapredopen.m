@@ -187,7 +187,9 @@ function dsmapredopen(njobs,target,conf)
      % warp.hpc1.cs.cmu.edu was the root node of the cluster, which handled handled queueing for the cluster via
      % torque.
      if(submitlocal)
-       unix(['sleep ' num2str(floor(i/2)) ' && ' tmpOutFName ' &']);
+       logfileerr=[distprocdir 'stderr' num2str(i) '.log'];
+       logfileout=[distprocdir 'stdout' num2str(i) '.log'];
+       unix(['sleep ' num2str(floor(i/2)) ' && ' tmpOutFName ' >' logfileout ' 2>' logfileerr ' &']);
      else
        currchunk{end+1}=tmpOutFName;
        if(numel(currchunk)>=chunksize)
